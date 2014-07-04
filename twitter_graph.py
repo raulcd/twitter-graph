@@ -47,13 +47,23 @@ def update_nodes(graph_db, user_connections):
     people = graph_db.get_or_create_index(neo4j.Node, 'people')
     user_node = people.get_or_create('name', user_connections['user'],
                                      {'name':  user_connections['user']})
+    count = 0
     for friend in user_connections['friends'].items():
         friend_node = people.get_or_create('name', friend.screen_name,
-                                           {'name': friend.screen_name})
+                                           {'name': friend.screen_name,
+                                            'location': friend.location,
+                                            'timezone': friend.timezone})
         user_node.create_path("FOLLOWS", friend_node)
+        if count == 0:
+            count += 1
+            dict_attributes = vars(friend)
+            for k, v in dict_attributes.iteritems():
+                print "Key: %s, Value: %s" % (k, v)
     for follower in user_connections['followers'].items():
         follower_node = people.get_or_create('name', follower.screen_name,
-                                             {'name': follower.screen_name})
+                                             {'name': follower.screen_name,
+                                              'location': follower.location,
+                                              'timezone': follower.timezone})
         follower_node.create_path("FOLLOWS", user_node)
 
 
