@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import csv
+
 import tweepy
 from py2neo import neo4j
 
@@ -100,17 +102,26 @@ def update_nodes(graph_db, user_connections, twitter_api):
 
 
 def create_map_csv(graph_db, filename):
-    my_file = open(filename, 'w')
-    query = neo4j.CypherQuery(graph_db,
-                              "Match n return n.name, n.location, n.time_zone")
-    for record in query.stream():
-        if record[1]:
-            my_file.write('{0},{1}\n'.format(record[0].encode('utf-8'),
-                                             record[1].encode('utf-8')))
-        elif record[2]:
-            my_file.write('{0},{1}\n'.format(record[0].encode('utf-8'),
-                                             record[2].encode('utf-8')))
-    my_file.close()
+    with open(filename, 'wb') as csvfile:
+        my_file = csv.writer(csvfile, delimiter=',',
+                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        query = neo4j.CypherQuery(graph_db,
+                                  "Match n return n.name, n.location,"
+                                  " n.time_zone")
+        for record in query.stream():
+            if record[1]:
+                my_file.writerow([record[0].encode('utf-8'),
+                                  record[1].encode('utf-8')])
+            elif record[2]:
+                my_file.writerow([record[0].encode('utf-8'),
+                                  record[2].encode('utf-8')])
+
+"""
+Sample of query to extract common followers:
+    match (user { name: 'name_user1' })-[:FOLLOWS]->(friend),
+    (user2 { name: 'name_user2' })-[:FOLLOWS]->(friend) 
+    return distinct friend.name
+"""
 
 
 if __name__ == '__main__':
