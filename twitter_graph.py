@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import tweepy
-from py2neo import neo4j, node
+from py2neo import neo4j
 
 SECRETS_FILE = 'secrets.txt'
 NEO4J_DB = 'http://localhost:7474/db/data/'
@@ -46,20 +46,19 @@ def start_database():
 def update_nodes(graph_db, user_connections):
     people = graph_db.get_or_create_index(neo4j.Node, 'people')
     user_node = people.get_or_create('name', user_connections['user'],
-            {'name':  user_connections['user']})
+                                     {'name':  user_connections['user']})
     for friend in user_connections['friends'].items():
         friend_node = people.get_or_create('name', friend.screen_name,
-                {'name': friend.screen_name})
+                                           {'name': friend.screen_name})
         user_node.create_path("FOLLOWS", friend_node)
     for follower in user_connections['followers'].items():
         follower_node = people.get_or_create('name', follower.screen_name,
-                {'name': follower.screen_name})
+                                             {'name': follower.screen_name})
         follower_node.create_path("FOLLOWS", user_node)
 
 
 if __name__ == '__main__':
     graph_db = start_database()
-    print(graph_db.neo4j_version)
     user = raw_input("What's the username you want to check?")
     user_connections = get_twitter_connections(user)
     update_nodes(graph_db, user_connections)
