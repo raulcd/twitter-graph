@@ -20,25 +20,25 @@ def get_followers(api, user):
     docstring for get_twitter_followers
     Get twitter followers from a user and returns the list of followers
     """
-    return api.followers(id=user)
-    pass
+    return tweepy.Cursor(api.followers, id=user)
 
 
 def get_followed(api, user):
     """
     Get the followed users from a user
     """
-    return api.friends(id=user)
+    return tweepy.Cursor(api.friends, id=user)
 
 
 if __name__ == '__main__':
     user = raw_input("What's the username you want to check?")
     api = get_twitter_api(*read_secrets())
+    cursor = 0
     friends = get_followed(api, user)
     print "Follows"
-    for friend in friends:
+    for friend in friends.items():
         print friend.name
     print "Followers"
     followers = get_followers(api, user)
-    for follower in followers:
+    for follower in followers.items():
         print follower.name
