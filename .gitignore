@@ -5,6 +5,9 @@ secrets.txt
 # C extensions
 *.so
 
+# Vim temp
+*.swp
+
 # Distribution / packaging
 .Python
 env/
